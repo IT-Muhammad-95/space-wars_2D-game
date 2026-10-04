@@ -43,8 +43,28 @@ class GameSprite(sprite.Sprite):
 
 
 class Player(GameSprite):
-    """Игрок (пока просто стоит на месте)"""
-    pass
+    """Игрок (управляется клавишами WASD)"""
+    def move(self):
+        """Обработка движения игрока"""
+        keys = key.get_pressed()  # Получаем состояние всех клавиш (нажата/не нажата)
+        if keys[K_a]:  # Если нажата A
+            self.rect.x -= self.speed  # Движение влево
+        if keys[K_d]:  # Если нажата D
+            self.rect.x += self.speed  # Движение вправо
+        if keys[K_w]:  # Если нажата W
+            self.rect.y -= self.speed  # Движение вверх
+        if keys[K_s]:  # Если нажата S
+            self.rect.y += self.speed  # Движение вниз
+
+        # Границы (чтобы игрок не вылетел за экран)
+        if self.rect.right > WIN_WIDTH:  # Если правая граница вышла за экран
+            self.rect.right = WIN_WIDTH  # Останавливаем у правого края
+        if self.rect.left < 0:  # Если левая граница вышла за экран
+            self.rect.left = 0  # Останавливаем у левого края
+        if self.rect.bottom > WIN_HEIGHT:  # Если нижняя граница вышла за экран
+            self.rect.bottom = WIN_HEIGHT  # Останавливаем у нижнего края
+        if self.rect.top < 0:  # Если верхняя граница вышла за экран
+            self.rect.top = 0  # Останавливаем у верхнего края
 
 
 # СОЗДАНИЕ ОБЪЕКТОВ И ГРУПП
@@ -61,6 +81,7 @@ while run:  # Пока игра запущена
     # ОБНОВЛЕНИЕ И ОТРИСОВКА (каждый кадр)
     window.blit(background, (0, 0))  # Рисуем фон в координатах (0, 0)
     ship.reset()  # Отрисовываем игрока
+    ship.move()  # Обрабатываем движение игрока
 
     display.update()  # Обновляем экран (отображаем все изменения)
     pygame.time.delay(DELAY_MS)  # Задержка, чтобы игра работала с постоянной скоростью
