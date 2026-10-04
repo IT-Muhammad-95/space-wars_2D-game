@@ -23,6 +23,7 @@ BULLET_SPEED = 10  # Скорость пуль игрока
 
 # СОЗДАНИЕ ОКНА
 pygame.init()  # Запускаем все системы Pygame (графика, звук, события)
+pygame.mixer.init()  # Запускаем звуковую подсистему отдельно (для надёжности)
 display.set_caption('Space Wars')  # Устанавливаем заголовок окна
 window = display.set_mode((WIN_WIDTH, WIN_HEIGHT))  # Создаём игровое окно нужного размера
 
@@ -112,6 +113,7 @@ class Player(GameSprite):
         """Выстрел (две пули — из правого и левого крыла)"""
         bullets.add(Bullet('all_sprites/bullet.png', self.rect.right - 20, self.rect.top, 15, 20, BULLET_SPEED))  # Пуля из правого крыла
         bullets.add(Bullet('all_sprites/bullet.png', self.rect.left, self.rect.top, 15, 20, BULLET_SPEED))  # Пуля из левого крыла
+        fire_sound.play()  # Звук выстрела
 
 
 class Enemy(GameSprite):
@@ -153,6 +155,7 @@ class Enemy(GameSprite):
         if self.shoot_timer >= self.shoot_delay:  # Если достигли задержки
             self.shoot_timer = 0  # Сбрасываем счётчик
             self.fire()  # Стреляем
+            enemy_fire.play()  # Звук выстрела врага
 
 
 # СОЗДАНИЕ ОБЪЕКТОВ И ГРУПП
@@ -168,6 +171,14 @@ for i in range(ENEMIES_NUMBER):  # Создаём 5 врагов в ряд
     enemy = Enemy('all_sprites/ship_enemy.png', x, 10, 80, 80, ENEMY_SPEED)  # Создаём врага
     enemies.add(enemy)  # Добавляем в группу
 
+# ЗВУКИ (загружаем все звуковые эффекты)
+fire_sound = pygame.mixer.Sound('sounds/fire.wav')  # Выстрел игрока
+boom_sound = pygame.mixer.Sound('sounds/boom.wav')  # Взрыв врага
+ship_boom = pygame.mixer.Sound('sounds/ship_boom.wav')  # Взрыв игрока
+enemy_fire = pygame.mixer.Sound('sounds/enemy_fire.wav')  # Выстрел врага
+winner = pygame.mixer.Sound('sounds/winner.wav')  # Победа
+# game_over = pygame.mixer.Sound('sounds/game_over.wav')  # Поражение
+
 
 # ГЛАВНЫЙ ЦИКЛ (игровой процесс)
 run = True  # Флаг, отвечающий за работу цикла (True = игра запущена)
@@ -182,11 +193,14 @@ while run:  # Пока игра запущена
             for enemy in hit_enemies:  # Перебираем всех врагов, с которыми столкнулись
                 explosion = Explosion(enemy.rect.centerx, enemy.rect.centery, 'all_sprites/boom.png')  # Взрыв на месте врага
                 effects.add(explosion)  # Добавляем взрыв в группу эффектов
+                ship_boom.play()  # Звук взрыва игрока
+            # game_over.play()  # Звук поражения
             run = False  # Игра окончена
 
         # Победа (если врагов не осталось)
         if len(enemies) == 0:  # Если в группе врагов 0 объектов
             print("Победа! Все враги уничтожены.")  # Выводим в консоль
+            winner.play()  # Звук победы
             run = False  # Игра окончена
 
         # Выстрел игрока по клику левой кнопкой мыши
@@ -200,11 +214,14 @@ while run:  # Пока игра запущена
     for enemy in sprite.groupcollide(enemies, bullets, True, True):  # True = удалять врага, True = удалять пулю
         explosion = Explosion(enemy.rect.centerx, enemy.rect.centery, 'all_sprites/boom.png')  # Взрыв на месте врага
         effects.add(explosion)  # Добавляем взрыв
+        boom_sound.play()  # Звук взрыва врага
 
     # Попадание вражеской пули в игрока (игрок умирает)
     if sprite.spritecollide(ship, enemy_bullets, True):  # Если вражеская пуля попала в корабль
         explosion = Explosion(ship.rect.centerx, ship.rect.centery, 'all_sprites/boom.png')  # Взрыв на месте игрока
         effects.add(explosion)  # Добавляем взрыв
+        ship_boom.play()  # Звук взрыва игрока
+        # game_over.play()  # Звук поражения
         run = False  # Игра окончена
 
     # Обновление и отрисовка всех групп (пули, игрок, враги, эффекты)
@@ -218,7 +235,7 @@ while run:  # Пока игра запущена
     enemies.draw(window)  # Рисуем всех врагов
 
     enemy_bullets.update()  # Обновляем все пули врагов
-    enemy_bullets.draw(window)  # Рисуем все пули врагов
+    enemy_bullets.draw(window)  # Рисуем все пули враговвввввв
 
     effects.update()  # Обновляем все эффекты (уменьшаем время жизни взрывов)
     effects.draw(window)  # Рисуем все эффекты
