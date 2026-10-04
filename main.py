@@ -8,6 +8,10 @@ WIN_HEIGHT = 720  # Высота игрового окна
 GAME_FPS = 60  # Количество кадров в секунду
 DELAY_MS = 1000 // GAME_FPS  # Задержка между кадрами в миллисекундах
 
+# Параметры врагов
+ENEMY_SPEED = 4  # Скорость движения врагов
+ENEMIES_NUMBER = 5  # Количество врагов
+
 # Параметры игрока
 PLAYER_SPEED = 10  # Скорость движения игрока
 
@@ -67,8 +71,20 @@ class Player(GameSprite):
             self.rect.top = 0  # Останавливаем у верхнего края
 
 
+class Enemy(GameSprite):
+    """Враг (пока просто стоит на месте)"""
+    pass
+
+
 # СОЗДАНИЕ ОБЪЕКТОВ И ГРУПП
 ship = Player('all_sprites/ship3.png', 512, 610, 80, 80, PLAYER_SPEED)  # Создаём игрока
+
+enemies = pygame.sprite.Group()  # Группа для врагов
+
+for i in range(ENEMIES_NUMBER):  # Создаём 5 врагов в ряд
+    x = 50 + i * 200  # Расстояние между врагами 200 пикселей
+    enemy = Enemy('all_sprites/ship_enemy.png', x, 10, 80, 80, ENEMY_SPEED)  # Создаём врага
+    enemies.add(enemy)  # Добавляем в группу
 
 
 # ГЛАВНЫЙ ЦИКЛ (игровой процесс)
@@ -80,8 +96,11 @@ while run:  # Пока игра запущена
 
     # ОБНОВЛЕНИЕ И ОТРИСОВКА (каждый кадр)
     window.blit(background, (0, 0))  # Рисуем фон в координатах (0, 0)
+
     ship.reset()  # Отрисовываем игрока
     ship.move()  # Обрабатываем движение игрока
+
+    enemies.draw(window)  # Рисуем всех врагов
 
     display.update()  # Обновляем экран (отображаем все изменения)
     pygame.time.delay(DELAY_MS)  # Задержка, чтобы игра работала с постоянной скоростью
